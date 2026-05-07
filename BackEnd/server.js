@@ -22,12 +22,7 @@ connectDB();
 
 //!Set up the middleware
 app.use(express.json());
-app.use(cors({
-  origin: [
-    'http://localhost:5173/',
-   
-  ]
-}));
+app.use(cors());
 
 //? Setup the router
 const PORT = process.env.PORT || 9080;
@@ -54,4 +49,4 @@ app.listen(PORT, () => {
   console.log(`server running at ${PORT}`);
 });
 
-module.exports = app
+module.exports = app;
