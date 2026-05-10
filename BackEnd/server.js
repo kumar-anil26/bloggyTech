@@ -22,8 +22,20 @@ dotenv.config();
 connectDB();
 
 //! Set up the middleware
+
+const corsOptions = {
+  origin: ["http://localhost:5173"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
+// Very important for Vercel: handle preflight requests globally
+app.options("*", cors(corsOptions));
+
 app.use(express.json());
-app.use(cors());
 
 //? Root Route (Fixes the "Cannot find route for /" error)
 app.get("/", (req, res) => {
