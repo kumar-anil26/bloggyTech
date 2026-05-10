@@ -14,39 +14,41 @@ const commentsRouter = require("./routers/comments/commentsRouter");
 //! Create an express app
 const app = express();
 
-//!Load the enviroment variable
+//! Load the environment variables
 dotenv.config();
 
-//!Established connection to MondoDB
+//! Establish connection to MongoDB
+// Note: In serverless, this may be called every time a function wakes up.
 connectDB();
 
-//!Set up the middleware
+//! Set up the middleware
 app.use(express.json());
 app.use(cors());
 
-//? Setup the router
-const PORT = process.env.PORT || 9080;
-
-//?Setup the user router
-app.use("/api/v1/users", usersRouter);
-
-//?SetUp the Category Router
-app.use("/api/v1/categories", categoriesRouter);
-
-//?SetUp the Post router
-app.use("/api/v1/posts", postsRouter);
-
-//?SetUP the Comments Router
-app.use("/api/v1/comments", commentsRouter);
-
-//!Not Found Error middleware (handler)
-app.use(notFound);
-
-//!Global error handling
-app.use(globalErrorHandler);
-
-app.listen(PORT, () => {
-  console.log(`server running at ${PORT}`);
+//? Root Route (Fixes the "Cannot find route for /" error)
+app.get("/", (req, res) => {
+  res.json({ message: "API is running..." });
 });
 
+//? Setup the routers
+app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/categories", categoriesRouter);
+app.use("/api/v1/posts", postsRouter);
+app.use("/api/v1/comments", commentsRouter);
+
+//! Not Found Error middleware
+app.use(notFound);
+
+//! Global error handling
+app.use(globalErrorHandler);
+
+//! ONLY listen if not running on Vercel
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 9080;
+  app.listen(PORT, () => {
+    console.log(`Server running at ${PORT}`);
+  });
+}
+
+// CRITICAL for Vercel
 module.exports = app;
