@@ -16,20 +16,40 @@ const Post = require("../../models/Posts/Post");
 exports.register = asyncHandler(async (req, res, next) => {
   const { username, email, password } = req.body;
   const profilePicture = req.file?.path || "default-profile.jpg";
-  const user = await User.findOne({ username });
-  if (user) {
-    throw new Error("Username Already Exist!");
+
+  // 1. Check if user exists with SAME username OR SAME email
+  const userExists = await User.findOne({
+    $or: [{ username }, { email }],
+  });
+
+  if (userExists) {
+    // Determine which one is the conflict for a better error message
+    if (userExists.username === username) {
+      res.status(400);
+      throw new Error("Username already exists!");
+    }
+    if (userExists.email === email) {
+      res.status(400);
+      throw new Error("Email is already registered!");
+    }
   }
+
+  // 2. Create the user
   const newUser = new User({ username, email, password, profilePicture });
+
+  // 3. Hash password
   const salt = await bcrypt.genSalt(10);
   newUser.password = await bcrypt.hash(password, salt);
+
+  // 4. Save
   await newUser.save();
+
   res.json({
     status: "success",
-    message: "Data Record save successfully.",
-    _id: newUser?.id,
+    message: "User registered successfully.",
+    _id: newUser?._id,
     userName: newUser?.username,
-    eamil: newUser?.email,
+    email: newUser?.email,
     role: newUser?.role,
     profilePicture: newUser?.profilePicture,
   });
