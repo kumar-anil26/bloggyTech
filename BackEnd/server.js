@@ -33,7 +33,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Very important for Vercel: handle preflight requests globally
-app.options("*", cors(corsOptions));
+app.options("{/*path}", cors(corsOptions));
 
 app.use(express.json());
 
